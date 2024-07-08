@@ -1,11 +1,11 @@
 {
     "action_space": [
         "steering_angle": {
-                "high": 20.0, #Reduced max sterring angle to prevent sharp turns
+                "high": 20.0,
                 "low": -20.0
             },
         "speed": {
-            "high": 3.0, #Reduced max speed for better control
+            "high": 3.0,
             "low": 1.0
         }
     ],
