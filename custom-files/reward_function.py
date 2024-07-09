@@ -1,15 +1,14 @@
 def reward_function(params):
     '''
-    Example of penalize steering, which helps mitigate zig-zag behaviors
+    Example of a reward function for AWS DeepRacer on the Ross Raceway track.
     '''
-    
+
     # Read input parameters
-    distance_from_center = params['distance_from_center']
     track_width = params['track_width']
-    steering = abs(params['steering_angle']) # Only need the absolute steering angle
-    speed = params['speed']
+    distance_from_center = params['distance_from_center']
     all_wheels_on_track = params['all_wheels_on_track']
-    progress = params['progress']
+    speed = params['speed']
+    steering_angle = abs(params['steering_angle']) # Only need the absolute steering angle
 
     # Calculate 3 marks that are farther and father away from the center line
     marker_1 = 0.1 * track_width
@@ -18,23 +17,24 @@ def reward_function(params):
 
     # Give higher reward if the car is closer to center line and vice versa
     if distance_from_center <= marker_1:
-        reward = 2
-    elif distance_from_center <= marker_2:
         reward = 1.0
+    elif distance_from_center <= marker_2:
+        reward = 0.5
     elif distance_from_center <= marker_3:
-        reward = 0.2
+        reward = 0.1
     else:
         reward = 1e-3  # likely crashed/ close to off track
 
-    # Steering penality threshold, change the number based on your action space setting
-    ABS_STEERING_THRESHOLD = 10
+    # Penalize reward if the car goes off track
+    if not all_wheels_on_track:
+        reward = 1e-3
 
-    # Penalize reward if the car is steering too much
-    if steering > ABS_STEERING_THRESHOLD:
-        reward *= 0.5
+    # Reward for the car's speed
+    reward += speed * 0.1
 
-    # Additional reward for completing the lap faster
-    if progress == 100:
-        reward +=10.0 # Large reward for completing the lap
+    # Penalize for steering too much to prevent zigzag behavior
+    ABS_STEERING_THRESHOLD = 15.0
+    if steering_angle > ABS_STEERING_THRESHOLD:
+        reward *= 0.8
 
     return float(reward)
